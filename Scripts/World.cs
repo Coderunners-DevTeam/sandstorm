@@ -85,6 +85,7 @@ Scale = Vector2.One,
 		box.AddChild(MakeUIButton("Stein", () => currentMaterial = MaterialType.Stone));
 		box.AddChild(MakeUIButton("Löschen", () => currentMaterial = MaterialType.Empty));
 
+
 		AddChild(uiLayer);
 	}
 
