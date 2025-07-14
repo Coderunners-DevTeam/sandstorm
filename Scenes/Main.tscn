@@ -6,3 +6,40 @@
 
 [node name="World" type="Node2D" parent="."]
 script = ExtResource("1_r150o")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(4, 4)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Control" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Label" type="Label" parent="CanvasLayer/Control"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 23.0
+
+[node name="Button" type="Button" parent="CanvasLayer/Control/Label"]
+layout_mode = 0
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="Button2" type="Button" parent="CanvasLayer/Control/Label"]
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="Button3" type="Button" parent="CanvasLayer/Control/Label"]
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="Button4" type="Button" parent="CanvasLayer/Control/Label"]
+offset_right = 8.0
+offset_bottom = 8.0
+
+[node name="Button5" type="Button" parent="CanvasLayer/Control/Label"]
+offset_right = 8.0
+offset_bottom = 8.0
