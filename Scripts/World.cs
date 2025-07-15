@@ -44,7 +44,7 @@ public partial class World : Node2D
 		sprite = new Sprite2D
 {
 	Texture = texture,
-Scale = Vector2.One,
+	Scale = Vector2.One,
 	Centered = false, // ✨ wichtig!
 	Position = Vector2.Zero
 };
