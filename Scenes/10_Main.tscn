@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://g01o7x7rmgxr"]
+[gd_scene load_steps=3 format=3 uid="uid://g01o7x7rmgxr"]
 
 [ext_resource type="Script" uid="uid://cxgsecqfj0wda" path="res://Scripts/World.cs" id="1_f38hm"]
+[ext_resource type="AudioStream" uid="uid://bjh2v45c2w6rc" path="res://assets/music/mid ob inst mix ab oz.mp3" id="2_i42ll"]
 
 [node name="Main" type="Node2D"]
 
@@ -21,3 +22,8 @@ layout_mode = 2
 
 [node name="Camera2D" type="Camera2D" parent="."]
 zoom = Vector2(4, 4)
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("2_i42ll")
+volume_db = -10.015
+autoplay = true
