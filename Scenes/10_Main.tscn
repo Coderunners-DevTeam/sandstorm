@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3 uid="uid://g01o7x7rmgxr"]
+
+[ext_resource type="Script" uid="uid://cxgsecqfj0wda" path="res://Scripts/World.cs" id="1_f38hm"]
+
+[node name="Main" type="Node2D"]
+
+[node name="World" type="Node2D" parent="."]
+script = ExtResource("1_f38hm")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="World"]
+
+[node name="MarginContainer" type="MarginContainer" parent="World/CanvasLayer"]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="UI" type="VBoxContainer" parent="World/CanvasLayer/MarginContainer"]
+layout_mode = 2
+
+[node name="FPSLabel" type="Label" parent="World/CanvasLayer/MarginContainer/UI"]
+layout_mode = 2
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(4, 4)

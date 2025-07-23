@@ -39,4 +39,7 @@ indent_size = 2
 indent_style = space
 indent_size = 2
 
+# ➕ C#-Spezifische Regeln
+[*.cs]
+csharp_new_line_before_open_brace = none
 

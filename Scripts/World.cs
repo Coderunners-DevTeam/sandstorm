@@ -10,6 +10,9 @@ public partial class World : Node2D {
 	private int WIDTH;
 	private int HEIGHT;
 
+	private bool isReady = false;
+
+	private Label fpsLabel;
 	private Image image;
 	private ImageTexture texture;
 	private Sprite2D sprite;
@@ -46,7 +49,7 @@ public partial class World : Node2D {
 		sprite = new Sprite2D {
 			Texture = texture,
 			Scale = Vector2.One,
-			Centered = false, // ✨ wichtig!
+			Centered = false,
 			Position = Vector2.Zero
 		};
 		AddChild(sprite);
@@ -59,6 +62,7 @@ public partial class World : Node2D {
 
 		camera.Position = new Vector2(WIDTH / 2, HEIGHT / 2);
 
+		isReady = true;
 
 	}
 
@@ -75,7 +79,7 @@ public partial class World : Node2D {
 		margin.AddChild(box);
 		uiLayer.AddChild(margin);
 
-		var fpsLabel = new Label { Name = "FPSLabel" };
+		fpsLabel = new Label { Name = "FPSLabel" };
 		box.AddChild(fpsLabel);
 
 		foreach (var keyValuePair in MaterialRegistry.Materials) {
@@ -93,6 +97,10 @@ public partial class World : Node2D {
 
 
 	public override void _Process(double delta) {
+		if (!isReady || texture == null || image == null)
+			return;
+
+
 		HandleInput();
 		UpdateSimulation();
 
@@ -134,6 +142,7 @@ public partial class World : Node2D {
 		if (Input.IsKeyPressed(Key.Key1)) currentMaterial = MaterialType.Sand;
 		if (Input.IsKeyPressed(Key.Key2)) currentMaterial = MaterialType.Water;
 		if (Input.IsKeyPressed(Key.Key3)) currentMaterial = MaterialType.Stone;
+		if (Input.IsKeyPressed(Key.Key4)) currentMaterial = MaterialType.Fire;
 		if (Input.IsKeyPressed(Key.E)) currentMaterial = MaterialType.Empty;
 	}
 
@@ -177,6 +186,29 @@ public partial class World : Node2D {
 						changed = true;
 					}
 				}
+				else if (mat == MaterialType.Fire) {
+					if (y > 0 && materialData[x, y - 1] == MaterialType.Empty) {
+						Swap(x, y, x, y - 1);
+						changed = true;
+					}
+					// Leichte horizontale Ausbreitung
+					else if (x > 0 && materialData[x - 1, y] == MaterialType.Empty) {
+						Swap(x, y, x - 1, y);
+						changed = true;
+					}
+					else if (x < WIDTH - 1 && materialData[x + 1, y] == MaterialType.Empty) {
+						Swap(x, y, x + 1, y);
+						changed = true;
+					}
+
+					// Feuer verliert sich zufällig
+					if (GD.Randi() % 100 < 5) {
+						materialData[x, y] = MaterialType.Empty;
+						worldData[x, y] = MaterialRegistry.Materials[MaterialType.Empty].Color;
+						changed = true;
+					}
+				}
+
 			}
 
 		if (changed)
