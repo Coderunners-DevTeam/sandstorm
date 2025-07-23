@@ -1,8 +1,12 @@
+/*
+*	HARUN DASTEKIN 2025
+*/
+
 using Godot;
 using System;
 
-public partial class World : Node2D
-{
+
+public partial class World : Node2D {
 	private int WIDTH;
 	private int HEIGHT;
 
@@ -16,16 +20,14 @@ public partial class World : Node2D
 	private Camera2D camera;
 	private bool needsUpdate = true;
 
-	private enum MaterialType { Empty, Sand, Water, Stone }
 	private MaterialType currentMaterial = MaterialType.Sand;
 
-	private readonly Color sandColor = new Color(1f, 1f, 0f);        // Gelb
-	private readonly Color waterColor = new Color(0f, 0.5f, 1f);     // Blau
-	private readonly Color stoneColor = new Color(0.4f, 0.4f, 0.4f); // Grau
-	private readonly Color emptyColor = new Color(0f, 0f, 0f);       // Schwarz
+	//MainMenu20 menu20 = new MainMenu20();
 
-	public override void _Ready()
-	{
+
+
+
+	public override void _Ready() {
 		Vector2 screenSize = GetViewport().GetVisibleRect().Size;
 		int blockSize = 4;
 
@@ -38,16 +40,15 @@ public partial class World : Node2D
 		materialData = new MaterialType[WIDTH, HEIGHT];
 
 		image = Image.CreateEmpty(WIDTH, HEIGHT, false, Image.Format.Rgba8);
-		image.Fill(emptyColor);
+		image.Fill(MaterialRegistry.Materials[MaterialType.Empty].Color);
 		texture = ImageTexture.CreateFromImage(image);
 
-		sprite = new Sprite2D
-{
-	Texture = texture,
-	Scale = Vector2.One,
-	Centered = false, // ✨ wichtig!
-	Position = Vector2.Zero
-};
+		sprite = new Sprite2D {
+			Texture = texture,
+			Scale = Vector2.One,
+			Centered = false, // ✨ wichtig!
+			Position = Vector2.Zero
+		};
 		AddChild(sprite);
 
 		ClearWorld();
@@ -61,11 +62,9 @@ public partial class World : Node2D
 
 	}
 
-	public override void _EnterTree()
-	{
+	public override void _EnterTree() {
 		var uiLayer = new CanvasLayer();
-		var margin = new MarginContainer
-		{
+		var margin = new MarginContainer {
 			AnchorLeft = 0,
 			AnchorTop = 0,
 			OffsetLeft = 20,
@@ -79,64 +78,57 @@ public partial class World : Node2D
 		var fpsLabel = new Label { Name = "FPSLabel" };
 		box.AddChild(fpsLabel);
 
-		box.AddChild(MakeUIButton("Reset", () => ClearWorld()));
-		box.AddChild(MakeUIButton("Sand", () => currentMaterial = MaterialType.Sand));
-		box.AddChild(MakeUIButton("Wasser", () => currentMaterial = MaterialType.Water));
-		box.AddChild(MakeUIButton("Stein", () => currentMaterial = MaterialType.Stone));
-		box.AddChild(MakeUIButton("Löschen", () => currentMaterial = MaterialType.Empty));
+		foreach (var keyValuePair in MaterialRegistry.Materials) {
+			var type = keyValuePair.Key;
+			var name = keyValuePair.Value.Name;
+
+			var button = new Buttons(name, () => currentMaterial = type);
+			box.AddChild(button.MakeUIButton());
+		}
 
 
 		AddChild(uiLayer);
+
 	}
 
-	private Button MakeUIButton(string text, Action onClick)
-	{
-		var button = new Button { Text = text };
-		button.Pressed += onClick;
-		return button;
-	}
 
-	public override void _Process(double delta)
-	{
+	public override void _Process(double delta) {
 		HandleInput();
 		UpdateSimulation();
 
-		if (needsUpdate)
-		{
+		if (needsUpdate) {
 			UpdateImage();
 			texture.Update(image);
 			needsUpdate = false;
 		}
 
-		Label fpsLabel = GetNode<Label>("UI/FPSLabel");
-		fpsLabel.Text = $"FPS: {Engine.GetFramesPerSecond()}";
+		Label fpsLabel = GetNodeOrNull<Label>("CanvasLayer/MarginContainer/UI/FPSLabel");
+		if (fpsLabel != null) {
+			fpsLabel.Text = $"FPS: {Engine.GetFramesPerSecond()}";
+		}
 	}
 
-	private void ClearWorld()
-	{
+	private void ClearWorld() {
 		for (int x = 0; x < WIDTH; x++)
-		for (int y = 0; y < HEIGHT; y++)
-		{
-			worldData[x, y] = emptyColor;
-			materialData[x, y] = MaterialType.Empty;
-		}
+			for (int y = 0; y < HEIGHT; y++) {
+				worldData[x, y] = MaterialRegistry.Materials[MaterialType.Empty].Color;
+				materialData[x, y] = MaterialType.Empty;
+			}
 		needsUpdate = true;
 	}
 
-	private void HandleInput()
-	{
-		if (Input.IsActionPressed("ui_touch") || Input.IsMouseButtonPressed(MouseButton.Left))
-	{
-		Vector2 pos = GetLocalMousePosition();
-		int x = (int)(pos.X / sprite.Scale.X);
-		int y = (int)(pos.Y / sprite.Scale.Y);
+	private void HandleInput() {
+		//if (Input.IsActionPressed("ui_touch") || Input.IsMouseButtonPressed(MouseButton.Left)) {
+		if (Input.IsMouseButtonPressed(MouseButton.Left)) {
+			Vector2 pos = GetLocalMousePosition();
+			int x = (int)(pos.X / sprite.Scale.X);
+			int y = (int)(pos.Y / sprite.Scale.Y);
 
-		if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-		{
-			PlaceMaterial(x, y);
-			needsUpdate = true;
+			if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
+				PlaceMaterial(x, y);
+				needsUpdate = true;
+			}
 		}
-	}
 
 
 		if (Input.IsKeyPressed(Key.Key1)) currentMaterial = MaterialType.Sand;
@@ -145,90 +137,61 @@ public partial class World : Node2D
 		if (Input.IsKeyPressed(Key.E)) currentMaterial = MaterialType.Empty;
 	}
 
-	private void PlaceMaterial(int x, int y)
-	{
-		switch (currentMaterial)
-		{
-			case MaterialType.Sand:
-				materialData[x, y] = MaterialType.Sand;
-				worldData[x, y] = sandColor;
-				break;
-			case MaterialType.Water:
-				materialData[x, y] = MaterialType.Water;
-				worldData[x, y] = waterColor;
-				break;
-			case MaterialType.Stone:
-				materialData[x, y] = MaterialType.Stone;
-				worldData[x, y] = stoneColor;
-				break;
-			case MaterialType.Empty:
-				materialData[x, y] = MaterialType.Empty;
-				worldData[x, y] = emptyColor;
-				break;
-		}
+	private void PlaceMaterial(int x, int y) {
+		materialData[x, y] = currentMaterial;
+		worldData[x, y] = MaterialRegistry.Materials[currentMaterial].Color;
 	}
 
-	private void UpdateSimulation()
-	{
+	private void UpdateSimulation() {
 		bool changed = false;
 
 		for (int y = HEIGHT - 2; y >= 0; y--)
-		for (int x = 1; x < WIDTH - 1; x++)
-		{
-			MaterialType mat = materialData[x, y];
+			for (int x = 1; x < WIDTH - 1; x++) {
+				MaterialType mat = materialData[x, y];
 
-			if (mat == MaterialType.Sand)
-			{
-				if (materialData[x, y + 1] == MaterialType.Empty)
-				{
-					Swap(x, y, x, y + 1);
-					changed = true;
+				if (mat == MaterialType.Sand) {
+					if (materialData[x, y + 1] == MaterialType.Empty) {
+						Swap(x, y, x, y + 1);
+						changed = true;
+					}
+					else if (materialData[x - 1, y + 1] == MaterialType.Empty) {
+						Swap(x, y, x - 1, y + 1);
+						changed = true;
+					}
+					else if (materialData[x + 1, y + 1] == MaterialType.Empty) {
+						Swap(x, y, x + 1, y + 1);
+						changed = true;
+					}
 				}
-				else if (materialData[x - 1, y + 1] == MaterialType.Empty)
-				{
-					Swap(x, y, x - 1, y + 1);
-					changed = true;
-				}
-				else if (materialData[x + 1, y + 1] == MaterialType.Empty)
-				{
-					Swap(x, y, x + 1, y + 1);
-					changed = true;
-				}
-			}
-			else if (mat == MaterialType.Water)
-			{
-				if (materialData[x, y + 1] == MaterialType.Empty)
-				{
-					Swap(x, y, x, y + 1);
-					changed = true;
-				}
-				else if (materialData[x - 1, y] == MaterialType.Empty)
-				{
-					Swap(x, y, x - 1, y);
-					changed = true;
-				}
-				else if (materialData[x + 1, y] == MaterialType.Empty)
-				{
-					Swap(x, y, x + 1, y);
-					changed = true;
+				else if (mat == MaterialType.Water) {
+					if (materialData[x, y + 1] == MaterialType.Empty) {
+						Swap(x, y, x, y + 1);
+						changed = true;
+					}
+					else if (materialData[x - 1, y] == MaterialType.Empty) {
+						Swap(x, y, x - 1, y);
+						changed = true;
+					}
+					else if (materialData[x + 1, y] == MaterialType.Empty) {
+						Swap(x, y, x + 1, y);
+						changed = true;
+					}
 				}
 			}
-		}
 
 		if (changed)
 			needsUpdate = true;
 	}
 
-	private void Swap(int x1, int y1, int x2, int y2)
-	{
+	private void Swap(int x1, int y1, int x2, int y2) {
 		(materialData[x2, y2], materialData[x1, y1]) = (materialData[x1, y1], materialData[x2, y2]);
 		(worldData[x2, y2], worldData[x1, y1]) = (worldData[x1, y1], worldData[x2, y2]);
 	}
 
-	private void UpdateImage()
-	{
+	private void UpdateImage() {
 		for (int x = 0; x < WIDTH; x++)
-		for (int y = 0; y < HEIGHT; y++)
-			image.SetPixel(x, y, worldData[x, y]);
+			for (int y = 0; y < HEIGHT; y++)
+				image.SetPixel(x, y, worldData[x, y]);
 	}
 }
+
